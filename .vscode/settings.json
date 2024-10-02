@@ -9,17 +9,10 @@
             "server": "cxmgkzhk95kfgbq4.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
             "port": 3306,
             "driver": "MariaDB",
-<<<<<<< Updated upstream
             "username": "ptbifbampjlizcth",
             "password": "wgd5eoct1oku31ct",
             "database": "gxgwu36i9tw809x5",
             "name": "WishlistDB"
-=======
-            "name": "WishlistDB",
-            "username": "ptbifbampjlizcth",
-            "password": "wgd5eoct1oku31ct",
-            "database": "gxgwu36i9tw809x5"
->>>>>>> Stashed changes
         }
     ]
 }
