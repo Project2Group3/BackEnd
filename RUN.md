@@ -19,7 +19,7 @@ For macOS
 ### source .venv/bin/activate
 Virtual Enviroment is now running, install Django
 ### python3 -m pip install django
-
+pip install djangorestframework
 
 ## Run Locally
 In Terminal run
