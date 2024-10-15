@@ -12,10 +12,10 @@ class User(models.Model):
         return self.username
 
 
-class userMadeList(models.Model):
-    userId= models.ForeignKey('User', on_delete=models.CASCADE)
-    itemId= models.ForeignKey('Item', on_delete=models.CASCADE)
-    listName = models.CharField(max_length=250)
+class UserItemList(models.Model):
+    user= models.ForeignKey('User', on_delete=models.CASCADE)
+    item= models.ForeignKey('Item', on_delete=models.CASCADE)
+    list_name = models.CharField(max_length=250)
     listId= models.AutoField(primary_key=True)
     def __str__(self):
         return self.listName
@@ -23,7 +23,7 @@ class userMadeList(models.Model):
 
 class Item(models.Model):
     itemId= models.AutoField(primary_key=True)
-    price= models.IntegerField(max_length=64)
+    price= models.FloatField()
     name = models.CharField(max_length=250)
     url = models.CharField(max_length=250)
     image = models.CharField(max_length=250, null=True, blank=True)
