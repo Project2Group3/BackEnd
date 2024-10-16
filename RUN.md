@@ -18,7 +18,17 @@ For macOS
 ### python3 -m venv .venv
 ### source .venv/bin/activate
 Virtual Enviroment is now running, install Django
-### python3 -m pip install django
+### pip install "django>=4.2,<5.0"
+
+
+To set Connection to database
+## brew install openssl
+## export LDFLAGS="-L/opt/homebrew/opt/openssl/lib"
+## export CPPFLAGS="-I/opt/homebrew/opt/openssl/include"
+## pip install mysqlclient
+## python manage.py migrate
+
+
 
 
 ## Run Locally
