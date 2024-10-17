@@ -22,6 +22,7 @@ For macOS
 ### python3 -m venv .venv
 ### source .venv/bin/activate
 Virtual Enviroment is now running, install Django
+
 ### pip install "django>=4.2,<5.0"
 
 
@@ -31,9 +32,6 @@ To set Connection to database
 ### export CPPFLAGS="-I/opt/homebrew/opt/openssl/include"
 ### pip install mysqlclient
 ### python manage.py migrate
-
-
-
 
 ## Run Locally
 In Terminal 
