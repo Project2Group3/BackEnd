@@ -21,7 +21,7 @@ media/
 .idea/
 
 # VSCode #
-.vscode/
+# .vscode/
 
 # Environments #
 .env
