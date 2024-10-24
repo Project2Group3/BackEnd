@@ -15,6 +15,8 @@ Virtual Enviroment is now running, install Django
 ### python -m pip install "django>=4.2,<5.0"
 ### python -m pip install djangorestframework
 ### pip install mysqlclient
+### pip install django-cors-headers
+
 
 
 
