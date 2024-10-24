@@ -27,6 +27,15 @@ Virtual Enviroment is now running, install Django
 
 
 To set Connection to database
+## brew install openssl
+## export LDFLAGS="-L/opt/homebrew/opt/openssl/lib"
+## export CPPFLAGS="-I/opt/homebrew/opt/openssl/include"
+## pip install mysqlclient
+## python manage.py migrate
+
+
+
+To set Connection to database
 ### brew install openssl
 ### export LDFLAGS="-L/opt/homebrew/opt/openssl/lib"
 ### export CPPFLAGS="-I/opt/homebrew/opt/openssl/include"
