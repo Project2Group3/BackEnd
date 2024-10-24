@@ -31,6 +31,7 @@ def create_test_user():
 
         # user.save()
         print("Test user created:", serializer)
+
     else:
         print("User already exists.")
 
