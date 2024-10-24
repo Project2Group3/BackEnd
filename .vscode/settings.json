@@ -10,9 +10,9 @@
             "port": 3306,
             "driver": "MariaDB",
             "username": "ptbifbampjlizcth",
-            "password": "wgd5eoct1oku31ct",
             "database": "gxgwu36i9tw809x5",
-            "name": "WishlistDB"
+            "name": "MariaDB",
+            "password": "wgd5eoct1oku31ct"
         }
     ]
 }
