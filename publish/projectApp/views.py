@@ -162,6 +162,12 @@ def item_detail(request,pk):
 
 @api_view(['GET'])
 def get_items_by_list_id(request, list_id):
+    try:
+        list_obj = UserItemList.objects.get(pk=list_id)
+    except UserItemList.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if( not list_obj.is_public):
+        return Response(status=status.HTTP_404_NOT_FOUND)
     entries=Entry.objects.filter(list_id=list_id)
     if not entries.exists():
         return Response('Error : No items found in this list', status=status.HTTP_404_NOT_FOUND)
