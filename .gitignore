@@ -80,3 +80,5 @@ wheels/
 
 # pytest #
 .pytest_cache/
+
+*.session.sql
