@@ -124,11 +124,11 @@ def user_item_list_detail(request,pk):
 # }
 # ).data)
 
-@api_view(['GET'])
-def get_items(request):
-    items=Item.objects.all()
-    serializer =ItemSerializer(items, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+# @api_view(['GET'])
+# def get_items(request):
+#     items=Item.objects.all()
+#     serializer =ItemSerializer(items, many=True)
+#     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 def create_item(request):
@@ -223,3 +223,66 @@ def get_lists_by_user_id(request, user_id):
         return Response('Error : No lists found for this user', status=status.HTTP_404_NOT_FOUND)
     serializer =UserItemListSerializer(lists, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_items(request):
+    name = request.query_params.get('name',None)
+    if name:
+        items = Item.objects.filter(name__icontains=name)
+    else:
+        items = Item.objects.all()
+    serializer =ItemSerializer(items, many=True)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def admin_create_user(request):
+    if not request.user.is_Admin:
+        return Response({"error": "Permission denied. Admins only."}, status=status.HTTP_403_FORBIDDEN)    
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def admin_delete_user(request, pk):
+    if not request.user.is_Admin:
+        return Response({"error": "Permission denied. Admins only."}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    user.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['PATCH'])
+def admin_update_user(request, pk):
+    if not request.user.is_Admin:
+        return Response({"error": "Permission denied. Admins only."}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        user = User.objects.get(pk=pk)
+    except:
+        return Response ({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    serializer = UserSerializer(user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status= status.HTTP_404_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def user_login(request):
+    email = request.data.get('email')
+    try:
+        # Check if user exists by email
+        user = User.objects.get(email=email)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        # Create user if not found
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
