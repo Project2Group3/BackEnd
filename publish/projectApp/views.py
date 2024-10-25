@@ -13,6 +13,8 @@ def homepage(request):
 # Create your views here.
 @api_view(['GET'])
 def get_users(request):
+    if not request.user.is_Admin:
+        return Response({"error": "Permission denied. Admins only."}, status=status.HTTP_403_FORBIDDEN)
     users=User.objects.all()
     serializer =UserSerializer(users, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
