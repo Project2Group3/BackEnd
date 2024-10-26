@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework import viewsets,status
 from .models import User, UserItemList, Item, Entry
 from .serializers import UserSerializer, UserItemListSerializer, ItemSerializer, EntrySerializer
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 # Create your views here.
@@ -273,6 +275,23 @@ def admin_update_user(request, pk):
     return Response(serializer.errors, status= status.HTTP_404_BAD_REQUEST)
 
 
+# @api_view(['POST'])
+# def user_login(request):
+#     email = request.data.get('email')
+#     try:
+#         # Check if user exists by email
+#         user = User.objects.get(email=email)
+#         serializer = UserSerializer(user)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+#     except User.DoesNotExist:
+#         # Create user if not found
+#         serializer = UserSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['POST'])
 def user_login(request):
     email = request.data.get('email')
@@ -282,16 +301,26 @@ def user_login(request):
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except User.DoesNotExist:
-        # Create user if not found
+        # Create user if not found, or handle as needed
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
+
+
 @api_view(['GET'])
 def is_admin(request):
-    if request.user.is_Admin:
-        return Response({"is_admin": request.user.is_Admin}, status= status.HTTP_200_OK)
-    else:
-        return Response({"error": "User not authenticated"}, status= status.HTTP_401_UNAUTHORIZED)
+    email = request.COOKIES.get('user_email')
+    if email:
+        try:
+            user = User.objects.get(email=email)
+            if user.is_Admin:
+                return Response({"is_admin": True}, status=status.HTTP_200_OK)
+            else:
+                return Response({"is_admin": False}, status=status.HTTP_403_FORBIDDEN)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    return Response({"error": "No email found in cookies"}, status=status.HTTP_400_BAD_REQUEST)
