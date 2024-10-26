@@ -288,3 +288,10 @@ def user_login(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+def is_admin(request):
+    if request.user.is_Admin:
+        return Response({"is_admin": request.user.is_Admin}, status= status.HTTP_200_OK)
+    else:
+        return Response({"error": "User not authenticated"}, status= status.HTTP_401_UNAUTHORIZED)
