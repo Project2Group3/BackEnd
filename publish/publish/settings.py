@@ -139,6 +139,24 @@ CORS_ALLOW_METHODS = [
     'DELETE',
     'OPTIONS',
 ]
+# Allowing specific headers, including 'user_id'
+CORS_ALLOW_HEADERS = [
+    'User-Id',            # Custom header
+    'is_admin',           # Custom header if you're using this as well
+    'authorization',
+    'content-type',
+    'accept',
+    'origin',
+    'x-requested-with',
+    'user-agent',
+    'accept-encoding',
+    'connection',
+    'host',
+    'referer',
+    'sec-fetch-dest',
+    'sec-fetch-mode',
+    'sec-fetch-site',
+]
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True

@@ -46,17 +46,23 @@ def user_detail(request,pk):
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    logged_in_user_id= request.headers.get("User-Id")
+    if request.method in ['PUT','PATCH','DELETE'] and logged_in_user_id and int(logged_in_user_id) != int(user.id):
+        return Response({"error": "You can only update your own profile"}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'GET':
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method in ['PUT','PATCH']:
-        partial = True if request.method == 'PATCH' else False
-        serializer = UserSerializer(user, data=request.data,partial=partial)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if 'username' in request.data or 'image' in request.data:
+            partial = True if request.method == 'PATCH' else False
+            serializer = UserSerializer(user, data=request.data,partial=partial, fields=['username','image'])
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"Error":"Invalid fields for update"}, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -168,8 +174,14 @@ def get_items_by_list_id(request, list_id):
         list_obj = UserItemList.objects.get(pk=list_id)
     except UserItemList.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    if( not list_obj.is_public and not request.user.is_admin and request.user.id != list_obj.user.id):
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    user_id= request.headers.get('User-Id')
+    is_admin = request.headers.get('is_admin') == 'true'
+    try:
+        if( not list_obj.is_public and not is_admin and int(user_id) != int(list_obj.user.id)):
+            return Response({"detail":f"Access Denied, {list_id} or {is_admin} or {type(user_id)} / {int(list_obj.user.id)}"}, status=status.HTTP_404_NOT_FOUND)
+    except:
+        return Response({"detail":"Access Failed "}, status=status.HTTP_409_CONFLICT)
     entries=Entry.objects.filter(list_id=list_id)
     if not entries.exists():
         return Response('Error : No items found in this list', status=status.HTTP_404_NOT_FOUND)
