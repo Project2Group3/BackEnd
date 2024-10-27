@@ -142,7 +142,7 @@ CORS_ALLOW_METHODS = [
 # Allowing specific headers, including 'user_id'
 CORS_ALLOW_HEADERS = [
     'User-Id',            # Custom header
-    'is_admin',           # Custom header if you're using this as well
+    'Is-Admin',           # Custom header if you're using this as well
     'authorization',
     'content-type',
     'accept',
