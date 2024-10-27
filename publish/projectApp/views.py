@@ -13,7 +13,8 @@ def homepage(request):
 # Create your views here.
 @api_view(['GET'])
 def get_users(request):
-    if not request.user.is_Admin:
+    is_admin = request.headers.get('is_admin') == 'true'
+    if not is_admin:
         return Response({"error": "Permission denied. Admins only."}, status=status.HTTP_403_FORBIDDEN)
     users=User.objects.all()
     serializer =UserSerializer(users, many=True)
@@ -46,17 +47,23 @@ def user_detail(request,pk):
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    logged_in_user_id= request.headers.get("User-Id")
+    if request.method in ['PUT','PATCH','DELETE'] and logged_in_user_id and int(logged_in_user_id) != int(user.id):
+        return Response({"error": "You can only update your own profile"}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'GET':
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method in ['PUT','PATCH']:
-        partial = True if request.method == 'PATCH' else False
-        serializer = UserSerializer(user, data=request.data,partial=partial)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if 'username' in request.data or 'image' in request.data:
+            partial = True if request.method == 'PATCH' else False
+            serializer = UserSerializer(user, data=request.data,partial=partial, fields=['username','image'])
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"Error":"Invalid fields for update"}, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -168,8 +175,14 @@ def get_items_by_list_id(request, list_id):
         list_obj = UserItemList.objects.get(pk=list_id)
     except UserItemList.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    if( not list_obj.is_public):
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    user_id= request.headers.get('User-Id')
+    is_admin = request.headers.get('is_admin') == 'true'
+    try:
+        if( not list_obj.is_public and not is_admin and int(user_id) != int(list_obj.user.id)):
+            return Response({"detail":f"Access Denied, {list_id} or {is_admin} or {type(user_id)} / {int(list_obj.user.id)}"}, status=status.HTTP_404_NOT_FOUND)
+    except:
+        return Response({"detail":"Access Failed "}, status=status.HTTP_409_CONFLICT)
     entries=Entry.objects.filter(list_id=list_id)
     if not entries.exists():
         return Response('Error : No items found in this list', status=status.HTTP_404_NOT_FOUND)
@@ -238,7 +251,8 @@ def get_items(request):
 
 @api_view(['POST'])
 def admin_create_user(request):
-    if not request.user.is_Admin:
+    is_admin = request.headers.get('is_admin') == 'true'
+    if not is_admin:
         return Response({"error": "Permission denied. Admins only."}, status=status.HTTP_403_FORBIDDEN)    
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
@@ -248,7 +262,9 @@ def admin_create_user(request):
 
 @api_view(['DELETE'])
 def admin_delete_user(request, pk):
-    if not request.user.is_Admin:
+    is_admin = request.headers.get('is_admin') == 'true'
+
+    if not is_admin:
         return Response({"error": "Permission denied. Admins only."}, status=status.HTTP_403_FORBIDDEN)
     try:
         user = User.objects.get(pk=pk)
@@ -260,7 +276,8 @@ def admin_delete_user(request, pk):
 
 @api_view(['PATCH'])
 def admin_update_user(request, pk):
-    if not request.user.is_Admin:
+    is_admin = request.headers.get('is_admin') == 'true'
+    if not is_admin:
         return Response({"error": "Permission denied. Admins only."}, status=status.HTTP_403_FORBIDDEN)
     try:
         user = User.objects.get(pk=pk)
@@ -291,7 +308,9 @@ def user_login(request):
     
 @api_view(['GET'])
 def is_admin(request):
-    if request.user.is_Admin:
-        return Response({"is_admin": request.user.is_Admin}, status= status.HTTP_200_OK)
+    is_admin = request.headers.get('is_admin') == 'true'
+
+    if is_admin:
+        return Response({"is_admin": request.user.is_admin}, status= status.HTTP_200_OK)
     else:
         return Response({"error": "User not authenticated"}, status= status.HTTP_401_UNAUTHORIZED)
